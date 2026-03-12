@@ -1,0 +1,73 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-chat-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SERVER_ADDR: ":8080"
+      MYSQL_DSN: "gochat:gochat123@tcp(mysql:3306)/go_chat?charset=utf8mb4&parseTime=True&loc=Local"
+      REDIS_ADDR: "redis:6379"
+      REDIS_PASSWORD: ""
+      REDIS_DB: "0"
+      JWT_SECRET: "change-me-in-docker"
+      JWT_EXPIRE_HOURS: "72"
+      UPLOAD_DIR: "/app/data/uploads"
+      UPLOAD_MAX_IMAGE_MB: "5"
+    volumes:
+      - ./data/uploads:/app/data/uploads
+    ports:
+      - "${GO_CHAT_APP_PORT:-8080}:8080"
+    networks:
+      - gochat-net
+
+  mysql:
+    image: mysql:8.0
+    container_name: go-chat-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "root123456"
+      MYSQL_DATABASE: "go_chat"
+      MYSQL_USER: "gochat"
+      MYSQL_PASSWORD: "gochat123"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - gochat-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: go-chat-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - gochat-net
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  gochat-net:
+    driver: bridge

@@ -1,0 +1,30 @@
+.DS_Store
+.env
+.env.local
+docker-compose.override.yml
+tmp/
+.tmp/
+dist/
+node_modules/
+.gemini/
+.idea/
+.vscode/
+
+# Go
+bin/
+coverage.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Uploaded files
+data/
+
+# Local runtime artifacts
+*.log
+*.pid
+gcli-request-*.json
+
+# Local scratch files
+test-*.html

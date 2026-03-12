@@ -1,0 +1,719 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark Theme defaults */
+:root {
+  color-scheme: dark;
+  /* Telegram Web K Dark Theme (Default) */
+  --tg-bg-sidebar: #212121;
+  --tg-bg-chat: #0f0f0f;
+  --tg-bg-header: #212121;
+  --tg-bg-menu: #181818;
+
+  --tg-bg-hover: #2c2c2c;
+  --tg-bg-active: #8774e1;
+
+  --tg-text-white: #ffffff;
+  --tg-text-gray: #aaaaaa;
+  --tg-text-blue: #8774e1;
+  --tg-primary: #8774e1;
+
+  --tg-input-bg: #212121;
+  --tg-input-placeholder: #707579;
+
+  --tg-bubble-mine: #8774e1;
+  --tg-bubble-other: #212121;
+  --tg-bg-date: rgba(33, 33, 33, 0.4);
+  --tg-search-highlight: rgba(135, 116, 225, 0.4);
+
+  --tg-border: #0f0f0f;
+
+  /* Avatar Gradients */
+  --tg-avatar-1: linear-gradient(135deg, #ff516a 0%, #ff885e 100%);
+  --tg-avatar-2: linear-gradient(135deg, #ff885e 0%, #ffcd6a 100%);
+  --tg-avatar-3: linear-gradient(135deg, #9d74e3 0%, #e05bb9 100%);
+  --tg-avatar-4: linear-gradient(135deg, #54cb68 0%, #a0de7e 100%);
+  --tg-avatar-5: linear-gradient(135deg, #2a9ef1 0%, #72d5fd 100%);
+  --tg-avatar-6: linear-gradient(135deg, #665fff 0%, #82b1ff 100%);
+  --tg-avatar-7: linear-gradient(135deg, #e05bb9 0%, #f48fb1 100%);
+
+  background-color: var(--tg-bg-chat);
+}
+
+html {
+  background-color: var(--tg-bg-chat);
+}
+
+body {
+  background-color: var(--tg-bg-chat);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --tg-bg-sidebar: #ffffff;
+  --tg-bg-chat: #d2dbdf; /* Classic TG light blue-grey */
+  --tg-bg-header: #ffffff;
+  --tg-bg-menu: #ffffff;
+
+  --tg-bg-hover: #f4f4f5;  --tg-bg-active: #3390ec;
+  
+  --tg-text-white: #000000;
+  --tg-text-gray: #707579;
+  --tg-text-blue: #3390ec;
+  --tg-primary: #3390ec;
+  
+  --tg-input-bg: #ffffff;
+  --tg-input-placeholder: #a8a8a8;
+  
+  --tg-bubble-mine: #eeffde;
+  --tg-bubble-other: #ffffff;
+  --tg-bg-date: rgba(255, 255, 255, 0.4);
+  --tg-search-highlight: rgba(51, 144, 236, 0.3);
+
+  --tg-border: #dfe1e5;
+}
+
+[data-theme="light"] .tg-bubble--mine {
+  color: #000000;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+[data-theme="light"] .tg-bubble--other {
+  color: #000000;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* Subtle shadow for white bubbles */
+}
+/* Fix meta color in light mode */
+[data-theme="light"] .tg-bubble-meta {
+  color: #5bb462; /* Green checkmark color essentially */
+}
+[data-theme="light"] .tg-bubble--other .tg-bubble-meta {
+  color: #aeb5bc;
+}
+/* Fix input area border in light mode */
+[data-theme="light"] .tg-input-container {
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+[data-theme="light"] .tg-search-wrapper {
+  background-color: #f1f1f1;
+}
+[data-theme="light"] .tg-search-wrapper:focus-within {
+  background-color: #ffffff;
+  border-color: var(--tg-text-blue);
+  box-shadow: inset 0 0 0 1px var(--tg-text-blue);
+}
+[data-theme="light"] .tg-auth-page {
+  background-color: #ffffff;
+}
+[data-theme="light"] .tg-auth-card {
+  background-color: #ffffff;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  border: 1px solid #e0e0e0;
+}
+[data-theme="light"] .tg-auth-title {
+  color: #000000;
+}
+[data-theme="light"] .tg-auth-input {
+  color: #000000;
+  border-color: #dfe1e5;
+}
+
+body {
+  @apply bg-[var(--tg-bg-chat)] text-[var(--tg-text-white)] overflow-hidden;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  user-select: none; /* Make UI elements non-selectable by default */
+}
+
+/* Allow text selection only in specific content areas */
+.tg-bubble-text, 
+.tg-search-input, 
+input, 
+textarea {
+  user-select: text;
+}
+
+.tg-list, .tg-chat-content, .tg-sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(128, 128, 128, 0.3) transparent;
+}
+
+[data-theme="light"] .tg-list, 
+[data-theme="light"] .tg-chat-content,
+[data-theme="light"] .tg-sidebar {
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+/* Custom Scrollbar (WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 128, 128, 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(128, 128, 128, 0.5);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Base Layout */
+.tg-layout {
+  @apply flex w-full h-screen overflow-hidden;
+}
+
+/* Sidebar */
+.tg-sidebar {
+  @apply w-full md:w-[400px] flex flex-col bg-[var(--tg-bg-sidebar)] border-r border-[var(--tg-border)] relative z-20 flex-shrink-0;
+}
+.tg-sidebar--hidden {
+  @apply hidden md:flex;
+}
+
+.tg-header {
+  @apply h-14 min-h-[56px] flex items-center px-4 gap-4 bg-[var(--tg-bg-sidebar)] z-10;
+}
+
+.tg-search-wrapper {
+  @apply flex-1 bg-[#181818] h-10 rounded-full flex items-center px-4 transition-colors focus-within:bg-[var(--tg-bg-hover)] border border-transparent focus-within:border-[var(--tg-text-blue)];
+}
+.tg-search-input {
+  @apply bg-transparent w-full text-[16px] text-[var(--tg-text-white)] placeholder-[var(--tg-input-placeholder)] focus:outline-none ml-2;
+  letter-spacing: -0.01em;
+}
+
+.tg-search-pill {
+  background-color: #1c1c1c;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.tg-search-pill:focus-within {
+  background-color: #212121;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+[data-theme="light"] .tg-search-pill {
+  background-color: #f4f4f5;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+[data-theme="light"] .tg-search-pill:focus-within {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+
+/* Header Search Animations */
+.header-fade-enter-active,
+.header-fade-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.header-fade-enter-from,
+.header-fade-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.search-expand-enter-active,
+.search-expand-leave-active {
+  transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+}
+.search-expand-enter-from,
+.search-expand-leave-to {
+  opacity: 0;
+  transform: scaleX(0.95) translateX(10px);
+}
+
+.tg-list {
+  @apply flex-1 overflow-y-auto overflow-x-hidden;
+}
+
+/* Chat Area */
+.tg-chat {
+  @apply flex-1 flex flex-col bg-[var(--tg-bg-chat)] relative z-10 h-full;
+  transition: all 0.25s ease-out;
+}
+.tg-chat--hidden {
+  @apply hidden md:flex;
+}
+
+.tg-chat-header {
+  @apply h-14 min-h-[56px] flex items-center justify-between px-4 bg-[var(--tg-bg-header)] cursor-pointer z-10 shadow-sm;
+}
+
+.tg-chat-content {
+  @apply flex-1 overflow-y-auto overflow-x-hidden px-4 flex flex-col gap-1;
+}
+
+/* Component: Buttons */
+.tg-btn-primary {
+  @apply bg-[var(--tg-primary)] text-white font-semibold px-4 py-2.5 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all;
+}
+.tg-btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.tg-btn-danger {
+  @apply bg-red-500 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-red-600 active:scale-[0.98] transition-all;
+}
+
+.tg-btn-secondary {
+  @apply bg-[var(--tg-bg-hover)] text-[var(--tg-text-white)] font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 active:scale-[0.98] transition-all;
+}
+
+.tg-btn-danger-ghost {
+  @apply text-red-500 font-semibold px-4 py-2.5 rounded-xl bg-transparent border border-red-500/30 hover:bg-red-500/10 active:scale-[0.98] transition-all;
+}
+
+.tg-btn-ghost {
+  @apply text-[var(--tg-primary)] font-semibold px-3 py-1.5 rounded-lg hover:bg-[var(--tg-bg-hover)] transition-colors active:scale-[0.98];
+}
+
+.tg-icon-btn {
+  @apply w-10 h-10 flex items-center justify-center flex-shrink-0 rounded-full text-[var(--tg-text-gray)] hover:bg-[var(--tg-bg-hover)] hover:text-[var(--tg-text-white)] transition-colors active:scale-95;
+}
+.tg-icon-btn:disabled {
+  @apply opacity-30 cursor-not-allowed;
+}
+
+/* Chat Input Area */
+.tg-input-area {
+  @apply relative w-full bg-[var(--tg-bg-chat)] pb-4 px-4 pt-2 z-20 flex-shrink-0;
+}
+
+.tg-input-container {
+  @apply bg-[var(--tg-input-bg)] rounded-xl flex items-end p-2 gap-2 transition-colors w-full max-w-[720px] mx-auto;
+}
+
+.tg-input-field {
+  @apply bg-transparent flex-1 text-[var(--tg-text-white)] placeholder-[var(--tg-input-placeholder)] px-2 py-2.5 max-h-[120px] overflow-y-auto resize-none focus:outline-none text-[16px] leading-[1.3125];
+  letter-spacing: -0.01em;
+  word-break: break-word;
+  scrollbar-width: none; /* Firefox */
+}
+.tg-input-field::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Edge */
+}
+
+.tg-send-btn {
+  @apply w-10 h-10 flex items-center justify-center rounded-full text-[var(--tg-primary)] hover:bg-[var(--tg-bg-hover)] transition-colors flex-shrink-0 mb-0.5 active:scale-95;
+}
+
+/* Bubble Styles */
+.tg-bubble-row {
+  @apply flex w-full mb-1;
+  transition: all 0.25s ease-out;
+}
+.tg-bubble-row--mine {
+  @apply justify-end;
+}
+.tg-bubble-row--other {
+  @apply justify-start;
+}
+
+/* Bubble Styles Refined */
+.tg-bubble {
+  @apply relative max-w-[85%] md:max-w-[420px] px-3.5 py-[6px] text-[16px] leading-[1.3125] shadow-sm;
+  border-radius: 16px;
+  transition: all 0.25s ease-out;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.tg-bubble--image-only {
+  @apply p-[1px] md:max-w-[420px]; /* Ultra minimal padding to create a thin border effect like TG */
+}
+
+/* Tail base styles */
+.tg-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+}
+
+.tg-bubble--mine {
+  @apply bg-[#8774e1] text-white rounded-br-[4px];
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.tg-bubble--mine::after {
+  right: -6px;
+  background: #8774e1;
+  clip-path: polygon(0 0, 0% 100%, 100% 100%);
+}
+
+.tg-bubble--other {
+  @apply bg-[var(--tg-bg-header)] text-[var(--tg-text-white)] rounded-bl-[4px];
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.tg-bubble--other::after {
+  left: -6px;
+  background: var(--tg-bg-header);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+/* Light theme overrides for classic TG look */
+[data-theme="light"] .tg-bubble--mine {
+  background: #eeffde;
+  color: #000;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+[data-theme="light"] .tg-bubble--mine::after {
+  background: #eeffde;
+}
+[data-theme="light"] .tg-bubble--other {
+  background: #ffffff;
+  color: #000;
+}
+[data-theme="light"] .tg-bubble--other::after {
+  background: #ffffff;
+}
+
+.tg-bubble-meta {
+  @apply float-right ml-3 mt-1 flex items-center text-[12px] opacity-60 select-none;
+  font-weight: 400;
+}
+
+.tg-bubble-meta--floating {
+  @apply absolute bottom-1 right-1 bg-black/30 backdrop-blur-md text-white px-1.5 py-0.5 rounded-full opacity-100 mt-0;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.tg-image-message {
+  @apply block rounded-[15px] max-w-full max-h-[300px] md:max-h-[400px] object-cover cursor-pointer m-0 p-0;
+}
+
+.tg-image-fallback {
+  @apply text-xs text-[var(--tg-text-gray)] py-2;
+}
+
+/* Conversation Item */
+.tg-item {
+  @apply flex items-center p-2.5 gap-3 cursor-pointer transition-all duration-300 rounded-lg mx-2 my-0.5;
+}
+.tg-item:not(.tg-item--active):hover {
+  @apply bg-[var(--tg-bg-hover)];
+  transform: scale(1.02);
+}
+.tg-item:active {
+  transform: scale(0.98);
+}
+.tg-item--active {
+  @apply bg-[var(--tg-bg-active)];
+}
+.tg-item-avatar {
+  @apply w-12 h-12 rounded-full flex items-center justify-center text-lg font-semibold text-white flex-shrink-0;
+}
+.tg-item-content {
+  @apply flex-1 min-w-0;
+}
+.tg-item-top {
+  @apply flex justify-between items-baseline;
+}
+.tg-item-title {
+  @apply text-[16px] font-semibold truncate text-[var(--tg-text-white)];
+  letter-spacing: -0.01em;
+}
+.tg-item-time {
+  @apply text-[12px] text-[var(--tg-text-gray)] ml-2 flex-shrink-0;
+  font-weight: 400;
+}
+.tg-item-bottom {
+  @apply flex justify-between items-center mt-0.5;
+}
+.tg-item-subtitle {
+  @apply text-[15px] text-[var(--tg-text-gray)] truncate flex-1 mr-2;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+/* Active state overrides */
+.tg-item--active .tg-item-subtitle, 
+.tg-item--active .tg-item-time {
+  @apply text-[rgba(255,255,255,0.8)];
+}
+
+.tg-badge {
+  @apply min-w-[20px] h-5 rounded-full bg-[var(--tg-text-gray)] text-white text-xs font-bold flex items-center justify-center px-1.5;
+}
+.tg-item--active .tg-badge {
+  @apply bg-white text-[var(--tg-primary)];
+}
+
+/* Auth Pages */
+.tg-auth-page {
+  @apply w-full h-screen flex items-center justify-center bg-[var(--tg-bg-chat)];
+}
+.tg-auth-card {
+  @apply w-full max-w-[360px] bg-[var(--tg-bg-sidebar)] p-10 rounded-2xl shadow-xl flex flex-col items-center gap-6;
+}
+.tg-auth-logo {
+  @apply w-24 h-24 bg-[var(--tg-primary)] rounded-full flex items-center justify-center mb-2;
+}
+.tg-auth-title {
+  @apply text-2xl font-bold text-[var(--tg-text-white)];
+}
+.tg-auth-subtitle {
+  @apply text-[var(--tg-text-gray)] text-center text-sm leading-relaxed;
+}
+.tg-auth-form {
+  @apply w-full flex flex-col gap-4;
+}
+.tg-auth-input {
+  @apply w-full bg-transparent border border-[var(--tg-border)] rounded-xl px-4 py-3 text-[var(--tg-text-white)] placeholder-[var(--tg-input-placeholder)] focus:border-[var(--tg-primary)] focus:outline-none transition-colors;
+}
+.tg-auth-btn {
+  @apply w-full bg-[var(--tg-primary)] text-white font-bold py-3 rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide text-sm mt-2 transition-all duration-300;
+}
+.tg-auth-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(135, 116, 225, 0.3);
+}
+.tg-auth-btn:active:not(:disabled) {
+  transform: scale(0.98) translateY(0);
+}
+/* Right Sidebar Drawer Animation */
+.tg-right-sidebar-wrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 20;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .tg-right-sidebar-wrapper {
+    position: relative;
+    width: 360px;
+    transition: width 0.25s ease-out;
+  }
+  
+  .slide-right-enter-from.tg-right-sidebar-wrapper,
+  .slide-right-leave-to.tg-right-sidebar-wrapper {
+    width: 0;
+  }
+}
+
+.tg-right-sidebar-inner {
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 768px) {
+  .tg-right-sidebar-inner {
+    width: 360px;
+  }
+}
+
+/* The sliding motion */
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: width 0.25s ease-out;
+}
+
+.slide-right-enter-active .tg-right-sidebar-inner,
+.slide-right-leave-active .tg-right-sidebar-inner {
+  transition: transform 0.25s ease-out;
+}
+
+.slide-right-enter-from .tg-right-sidebar-inner,
+.slide-right-leave-to .tg-right-sidebar-inner {
+  transform: translateX(100%);
+}
+/* Sidebar Push Animation */
+.push-sidebar-enter-active,
+.push-sidebar-leave-active,
+.push-sidebar-reverse-enter-active,
+.push-sidebar-reverse-leave-active {
+  transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+/* Forward: Chats -> Profile */
+.push-sidebar-enter-from {
+  transform: translateX(100%);
+}
+.push-sidebar-leave-to {
+  transform: translateX(-100%);
+}
+
+/* Reverse: Profile -> Chats */
+.push-sidebar-reverse-enter-from {
+  transform: translateX(-100%);
+}
+.push-sidebar-reverse-leave-to {
+  transform: translateX(100%);
+}
+
+/* Sidebar Fade Animation (Same level) */
+.sidebar-fade-enter-active,
+.sidebar-fade-leave-active {
+  transition: opacity 0.2s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.sidebar-fade-enter-from,
+.sidebar-fade-leave-to {
+  opacity: 0;
+}
+
+/* Toast Slide Animation */
+.toast-slide-enter-active,
+.toast-slide-leave-active,
+.toast-slide-move {
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+.toast-slide-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.toast-slide-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+  position: absolute; /* Ensures smooth list rearrangement */
+}
+
+/* Generic Fade Animation (for inline elements, out-in mode) */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Menu Pop Animation */
+@keyframes menu-pop-anim {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tg-menu-pop {
+  animation: menu-pop-anim 0.15s cubic-bezier(0.2, 0, 0, 1) forwards;
+  transform-origin: var(--menu-transform-origin, top left);
+}
+
+/* Tab Slide Animations */
+.tab-slide-enter-active,
+.tab-slide-leave-active,
+.tab-slide-reverse-enter-active,
+.tab-slide-reverse-leave-active {
+  transition: transform 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.tab-slide-enter-from {
+  transform: translateX(100%);
+}
+.tab-slide-leave-to {
+  transform: translateX(-100%);
+}
+
+.tab-slide-reverse-enter-from {
+  transform: translateX(-100%);
+}
+.tab-slide-reverse-leave-to {
+  transform: translateX(100%);
+}
+
+html.theme-transitioning,
+html.theme-transitioning * {
+  transition: none !important;
+}
+
+/* Theme View Transitions */
+::view-transition-group(root) {
+  animation: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Switching from Light to Dark: New snapshot (dark) should be on top to expand */
+:root:not([data-theme="light"])::view-transition-new(root) {
+  z-index: 999;
+}
+:root:not([data-theme="light"])::view-transition-old(root) {
+  z-index: 1;
+}
+
+/* Switching from Dark to Light: Old snapshot (dark) should be on top to shrink */
+:root[data-theme="light"]::view-transition-old(root) {
+  z-index: 999;
+}
+:root[data-theme="light"]::view-transition-new(root) {
+  z-index: 1;
+}
+
+.tg-auth-link {
+  @apply text-[var(--tg-primary)] text-sm hover:underline cursor-pointer;
+}
+
+@keyframes flash-highlight-bg {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.tg-flash-highlight {
+  position: relative;
+}
+
+.tg-flash-highlight::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: -4px;
+  left: -50vw;
+  right: -50vw;
+  background-color: var(--tg-search-highlight);
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  animation: flash-highlight-bg 1.5s ease-out;
+}
+
+.tg-search-mark {
+  background-color: var(--tg-search-highlight);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font: inherit;
+  line-height: inherit;
+  display: inline;
+}
