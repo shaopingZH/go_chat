@@ -11,15 +11,15 @@ services:
       redis:
         condition: service_healthy
     environment:
-      SERVER_ADDR: ":8080"
-      MYSQL_DSN: "gochat:gochat123@tcp(mysql:3306)/go_chat?charset=utf8mb4&parseTime=True&loc=Local"
-      REDIS_ADDR: "redis:6379"
-      REDIS_PASSWORD: ""
-      REDIS_DB: "0"
-      JWT_SECRET: "change-me-in-docker"
-      JWT_EXPIRE_HOURS: "72"
-      UPLOAD_DIR: "/app/data/uploads"
-      UPLOAD_MAX_IMAGE_MB: "5"
+      SERVER_ADDR: "${SERVER_ADDR:-:8080}"
+      MYSQL_DSN: "${MYSQL_DSN:-gochat:change-me-db-password@tcp(mysql:3306)/go_chat?charset=utf8mb4&parseTime=True&loc=Local}"
+      REDIS_ADDR: "${REDIS_ADDR:-redis:6379}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
+      REDIS_DB: "${REDIS_DB:-0}"
+      JWT_SECRET: "${JWT_SECRET:-change-me-jwt-secret}"
+      JWT_EXPIRE_HOURS: "${JWT_EXPIRE_HOURS:-72}"
+      UPLOAD_DIR: "${UPLOAD_DIR:-/app/data/uploads}"
+      UPLOAD_MAX_IMAGE_MB: "${UPLOAD_MAX_IMAGE_MB:-5}"
     volumes:
       - ./data/uploads:/app/data/uploads
     ports:
@@ -32,10 +32,10 @@ services:
     container_name: go-chat-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: "root123456"
-      MYSQL_DATABASE: "go_chat"
-      MYSQL_USER: "gochat"
-      MYSQL_PASSWORD: "gochat123"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-change-me-root-password}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-go_chat}"
+      MYSQL_USER: "${MYSQL_USER:-gochat}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-change-me-db-password}"
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
