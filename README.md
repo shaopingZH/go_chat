@@ -1,4 +1,4 @@
-# Go-Chat (Backend MVP)
+# Go-Chat
 
 Go-Chat is a real-time chat backend built with Go + Gin + WebSocket + MySQL + Redis.
 
