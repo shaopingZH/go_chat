@@ -34,40 +34,46 @@ Server default address: `:8080`
 
 ## Run With Docker
 
-1. Build and start all services (app + MySQL + Redis):
+1. Copy Docker environment variables to a dedicated local Docker env file and replace placeholder secrets before first use:
 
    ```bash
-   docker compose up -d --build
+   cp .env.docker.example .env.docker
+   ```
+
+2. Build and start all services (app + MySQL + Redis):
+
+   ```bash
+   docker compose --env-file .env.docker up -d --build
    ```
 
    If port `8080` is already occupied on host:
 
    ```bash
-   GO_CHAT_APP_PORT=18080 docker compose up -d --build
+   GO_CHAT_APP_PORT=18080 docker compose --env-file .env.docker up -d --build
    ```
 
-2. Check service status:
+3. Check service status:
 
    ```bash
-   docker compose ps
+   docker compose --env-file .env.docker ps
    ```
 
-3. Watch backend logs:
+4. Watch backend logs:
 
    ```bash
-   docker compose logs -f app
+   docker compose --env-file .env.docker logs -f app
    ```
 
-4. Stop services:
+5. Stop services:
 
    ```bash
-   docker compose down
+   docker compose --env-file .env.docker down
    ```
 
-5. Stop and remove database/cache volumes:
+6. Stop and remove database/cache volumes:
 
    ```bash
-   docker compose down -v
+   docker compose --env-file .env.docker down -v
    ```
 
 Default exposed address: `http://127.0.0.1:8080`
