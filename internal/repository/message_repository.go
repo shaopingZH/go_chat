@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const textMessageType = 1
+
 var ErrInvalidHistoryCursor = errors.New("invalid last_msg_id")
 var ErrInvalidHistoryAnchor = errors.New("invalid around_msg_id")
 
@@ -44,9 +46,7 @@ func (r *messageRepository) ListPrivateHistory(ctx context.Context, userID, targ
 		Where("group_id IS NULL").
 		Where("(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)", userID, targetID, targetID, userID)
 
-	if keyword != "" {
-		query = query.Where("content LIKE ?", "%"+keyword+"%")
-	}
+	query = applyHistoryKeywordFilter(query, keyword)
 
 	if lastMsgID > 0 {
 		var exists int64
@@ -84,9 +84,7 @@ func (r *messageRepository) ListGroupHistory(ctx context.Context, groupID, lastM
 	query := r.db.WithContext(ctx).
 		Where("group_id = ?", groupID)
 
-	if keyword != "" {
-		query = query.Where("content LIKE ?", "%"+keyword+"%")
-	}
+	query = applyHistoryKeywordFilter(query, keyword)
 
 	if lastMsgID > 0 {
 		var exists int64
@@ -399,4 +397,14 @@ func minInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func applyHistoryKeywordFilter(query *gorm.DB, keyword string) *gorm.DB {
+	if keyword == "" {
+		return query
+	}
+
+	return query.
+		Where("msg_type = ?", textMessageType).
+		Where("content LIKE ?", "%"+keyword+"%")
 }
