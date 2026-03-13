@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        GO_PROXY: "${GO_PROXY:-https://goproxy.cn,direct}"
+        ALPINE_REPO_HOST: "${ALPINE_REPO_HOST:-mirrors.aliyun.com}"
     container_name: go-chat-app
     restart: unless-stopped
     depends_on:

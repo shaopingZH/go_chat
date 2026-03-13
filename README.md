@@ -40,6 +40,8 @@ Server default address: `:8080`
    cp .env.docker.example .env.docker
    ```
 
+   The Docker build defaults to mainland-China friendly mirrors via `GO_PROXY` and `ALPINE_REPO_HOST`. Override them in `.env.docker` if you need different upstream sources.
+
 2. Build and start all services (app + MySQL + Redis):
 
    ```bash
