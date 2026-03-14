@@ -15,7 +15,7 @@ import {
 } from "../api/http"
 import { useAuthStore } from "./auth"
 import { shouldApplySearchResponse } from "../utils/chatSearch"
-import { createPendingImageMessage, findPendingImageReplacementIndex } from "../utils/chatImageUpload"
+import { createDeferredImageMessage, createPendingImageMessage, findPendingImageReplacementIndex } from "../utils/chatImageUpload"
 import type {
   ChatMessage,
   ChatType,
@@ -109,6 +109,18 @@ function buildConversationPreview(content: string, msgType: number): string {
     return "[图片]"
   }
   return content
+}
+
+function preloadImageSource(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve()
+    image.onerror = () => reject(new Error("图片预加载失败"))
+    image.src = src
+    if (image.complete && image.naturalWidth > 0) {
+      resolve()
+    }
+  })
 }
 
 import { useFriendStore } from "./friend"
@@ -554,6 +566,41 @@ export const useChatStore = defineStore("chat", {
         this.loadedHistory[key] = false
       }
     },
+    async finalizeDeferredImageMessage(key: string, messageId: number, previewUrl: string, remoteUrl: string) {
+      try {
+        await preloadImageSource(remoteUrl)
+      } catch {
+        // Even if preload fails, switch to the remote URL so the bubble can render its error state.
+      }
+
+      const bucket = this.messagesByKey[key] || []
+      const index = bucket.findIndex((item) => item.id === messageId)
+      if (index < 0) {
+        if (previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(previewUrl)
+        }
+        return
+      }
+
+      const current = bucket[index]
+      if (!current || current.resolvedContent !== remoteUrl) {
+        if (previewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(previewUrl)
+        }
+        return
+      }
+
+      bucket[index] = {
+        ...current,
+        content: remoteUrl,
+        resolvedContent: undefined,
+      }
+      this.messagesByKey[key] = bucket
+
+      if (previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    },
     ingestMessage(payload: ChatMessage) {
       const auth = useAuthStore()
       const selfID = Number(auth.user?.id || 0)
@@ -607,12 +654,11 @@ export const useChatStore = defineStore("chat", {
 
       if (!exists && pendingIndex >= 0 && Number(normalizedPayload.msg_type) === 2 && Number(normalizedPayload.sender?.id || 0) === selfID) {
         const pendingMessage = bucket[pendingIndex]
-        if (pendingMessage?.content?.startsWith("blob:")) {
-          URL.revokeObjectURL(pendingMessage.content)
-        }
-        bucket[pendingIndex] = normalizedPayload
+        const deferredMessage = createDeferredImageMessage(pendingMessage, normalizedPayload)
+        bucket[pendingIndex] = deferredMessage
         this.messagesByKey[key] = bucket
         this.touchConversation(key, normalizedPayload.content, normalizedPayload.created_at, normalizedPayload.msg_type)
+        void this.finalizeDeferredImageMessage(key, deferredMessage.id, pendingMessage.content, normalizedPayload.content)
         return
       }
 

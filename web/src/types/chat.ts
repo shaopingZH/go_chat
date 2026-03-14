@@ -41,6 +41,7 @@ export interface ChatMessage {
   created_at: string
   uploading?: boolean
   uploadProgressLabel?: string
+  resolvedContent?: string
 }
 
 export interface ConversationItem {
