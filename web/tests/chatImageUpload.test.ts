@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import type { ChatMessage } from '../src/types/chat.ts'
 import {
+  createDeferredImageMessage,
   createPendingImageMessage,
   findPendingImageReplacementIndex,
   resolveImageOverlayPresentation,
@@ -109,4 +110,36 @@ test('resolveImageOverlayPresentation uses labeled mode for uploading placeholde
     label: '图片上传中...',
     reserveSpace: false,
   })
+})
+
+test('createDeferredImageMessage keeps local preview until remote image is ready', () => {
+  const pending = {
+    id: -1,
+    sender: { id: 1, username: 'alice', avatar: '' },
+    target_id: 8,
+    chat_type: 'private',
+    msg_type: 2,
+    content: 'blob:preview-1',
+    created_at: '2026-03-14T10:00:00Z',
+    uploading: true,
+    uploadProgressLabel: '图片上传中...',
+  } as ChatMessage
+
+  const delivered = {
+    id: 77,
+    sender: { id: 1, username: 'alice', avatar: '' },
+    target_id: 8,
+    chat_type: 'private',
+    msg_type: 2,
+    content: '/uploads/images/final.png',
+    created_at: '2026-03-14T10:00:01Z',
+  } as ChatMessage
+
+  const merged = createDeferredImageMessage(pending, delivered)
+
+  assert.equal(merged.id, 77)
+  assert.equal(merged.content, 'blob:preview-1')
+  assert.equal(merged.resolvedContent, '/uploads/images/final.png')
+  assert.equal(merged.uploading, false)
+  assert.equal(merged.uploadProgressLabel, undefined)
 })

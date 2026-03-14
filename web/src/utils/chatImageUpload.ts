@@ -41,6 +41,16 @@ export function createPendingImageMessage(input: PendingImageInput): ChatMessage
   }
 }
 
+export function createDeferredImageMessage(pending: ChatMessage, delivered: ChatMessage): ChatMessage {
+  return {
+    ...delivered,
+    content: pending.content,
+    resolvedContent: delivered.content,
+    uploading: false,
+    uploadProgressLabel: undefined,
+  }
+}
+
 export function findPendingImageReplacementIndex(
   messages: ChatMessage[],
   input: PendingImageMatchInput,
