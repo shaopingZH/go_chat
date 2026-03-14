@@ -15,6 +15,7 @@ import {
 } from "../api/http"
 import { useAuthStore } from "./auth"
 import { shouldApplySearchResponse } from "../utils/chatSearch"
+import { createPendingImageMessage, findPendingImageReplacementIndex } from "../utils/chatImageUpload"
 import type {
   ChatMessage,
   ChatType,
@@ -598,6 +599,23 @@ export const useChatStore = defineStore("chat", {
 
       const bucket = this.messagesByKey[key] || []
       const exists = bucket.some((item) => item.id === normalizedPayload.id)
+      const pendingIndex = findPendingImageReplacementIndex(bucket, {
+        senderId: Number(normalizedPayload.sender?.id || 0),
+        chatType: normalizedPayload.chat_type,
+        targetId,
+      })
+
+      if (!exists && pendingIndex >= 0 && Number(normalizedPayload.msg_type) === 2 && Number(normalizedPayload.sender?.id || 0) === selfID) {
+        const pendingMessage = bucket[pendingIndex]
+        if (pendingMessage?.content?.startsWith("blob:")) {
+          URL.revokeObjectURL(pendingMessage.content)
+        }
+        bucket[pendingIndex] = normalizedPayload
+        this.messagesByKey[key] = bucket
+        this.touchConversation(key, normalizedPayload.content, normalizedPayload.created_at, normalizedPayload.msg_type)
+        return
+      }
+
       if (!exists) {
         bucket.push(normalizedPayload)
       }
@@ -1049,30 +1067,59 @@ export const useChatStore = defineStore("chat", {
         throw new Error("请先登录")
       }
 
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        throw new Error("WebSocket 未连接")
-      }
-
-      const uploaded = await uploadImage(file, auth.token)
-      if (!uploaded.url) {
-        throw new Error("上传失败")
+      if (!auth.user) {
+        throw new Error("用户信息未初始化")
       }
 
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         throw new Error("WebSocket 未连接")
       }
 
-      this.ws.send(
-        JSON.stringify({
-          type: "chat",
-          payload: {
-            target_id: conv.targetId,
-            chat_type: conv.chatType,
-            msg_type: 2,
-            content: uploaded.url,
-          },
-        }),
-      )
+      const key = makeKey(conv.chatType, conv.targetId)
+      const pendingMessage = createPendingImageMessage({
+        previewUrl: URL.createObjectURL(file),
+        targetId: conv.targetId,
+        chatType: conv.chatType,
+        sender: auth.user,
+      })
+      const bucket = this.messagesByKey[key] || []
+      bucket.push(pendingMessage)
+      this.messagesByKey[key] = bucket
+      this.touchConversation(key, pendingMessage.content, pendingMessage.created_at, pendingMessage.msg_type)
+
+      try {
+        const uploaded = await uploadImage(file, auth.token)
+        if (!uploaded.url) {
+          throw new Error("上传失败")
+        }
+
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+          throw new Error("WebSocket 未连接")
+        }
+
+        this.ws.send(
+          JSON.stringify({
+            type: "chat",
+            payload: {
+              target_id: conv.targetId,
+              chat_type: conv.chatType,
+              msg_type: 2,
+              content: uploaded.url,
+            },
+          }),
+        )
+      } catch (error) {
+        const currentBucket = this.messagesByKey[key] || []
+        const pendingIndex = currentBucket.findIndex((item) => item.id === pendingMessage.id)
+        if (pendingIndex >= 0) {
+          const [removed] = currentBucket.splice(pendingIndex, 1)
+          if (removed?.content?.startsWith("blob:")) {
+            URL.revokeObjectURL(removed.content)
+          }
+          this.messagesByKey[key] = currentBucket
+        }
+        throw error
+      }
     },
   },
 })

@@ -39,6 +39,8 @@ export interface ChatMessage {
   msg_type: number
   content: string
   created_at: string
+  uploading?: boolean
+  uploadProgressLabel?: string
 }
 
 export interface ConversationItem {

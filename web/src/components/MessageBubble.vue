@@ -21,8 +21,15 @@
       
       <!-- Content -->
       <div v-if="isImageMessage" class="relative group">
-        <img v-if="!imageLoadError" :src="message.content" alt="image message" class="tg-image-message" @click="emit('preview', message.content)" @error="onImageError" @load="emit('imageLoaded')">
+        <img v-if="!imageLoadError" :src="message.content" alt="image message" class="tg-image-message" :class="{ 'tg-image-message--loading': imageLoading || message.uploading }" @click="handlePreview" @error="onImageError" @load="onImageLoad">
         <div v-else class="tg-image-fallback">图片加载失败</div>
+
+        <Transition name="fade">
+          <div v-if="showImageOverlay" class="tg-image-upload-overlay">
+            <div class="tg-image-upload-spinner"></div>
+            <span class="tg-image-upload-label">{{ imageOverlayLabel }}</span>
+          </div>
+        </Transition>
         
         <!-- Meta (Time) floating on image -->
         <span class="tg-bubble-meta tg-bubble-meta--floating">
@@ -58,18 +65,33 @@ const emit = defineEmits<{
 }>()
 
 const imageLoadError = ref(false)
+const imageLoading = ref(true)
 
 const isImageMessage = computed(() => Number(props.message.msg_type) === 2)
 
 watch(
-  () => props.message.id,
+  () => [props.message.id, props.message.content],
   () => {
     imageLoadError.value = false
+    imageLoading.value = true
   },
 )
 
 function onImageError() {
   imageLoadError.value = true
+  imageLoading.value = false
+}
+
+function onImageLoad() {
+  imageLoading.value = false
+  emit('imageLoaded')
+}
+
+function handlePreview() {
+  if (props.message.uploading) {
+    return
+  }
+  emit('preview', props.message.content)
 }
 
 const avatarBg = computed(() => {
@@ -120,12 +142,52 @@ const timeText = computed(() => {
   if (Number.isNaN(date.getTime())) return ""
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
 })
+
+const showImageOverlay = computed(() => !imageLoadError.value && (Boolean(props.message.uploading) || imageLoading.value))
+
+const imageOverlayLabel = computed(() => props.message.uploadProgressLabel || '图片加载中...')
 </script>
 
 <style scoped>
 .bubble-enter {
   animation: bubble-pop 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
   will-change: transform, opacity;
+}
+
+.tg-image-message--loading {
+  filter: saturate(0.9) brightness(0.82);
+}
+
+.tg-image-upload-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.14), rgba(15, 23, 42, 0.48));
+  backdrop-filter: blur(2px);
+}
+
+.tg-image-upload-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 2.5px solid rgba(255, 255, 255, 0.28);
+  border-top-color: rgba(255, 255, 255, 0.96);
+  animation: tg-image-spin 0.9s linear infinite;
+}
+
+.tg-image-upload-label {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.52);
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 @keyframes bubble-pop {
@@ -136,6 +198,12 @@ const timeText = computed(() => {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes tg-image-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
