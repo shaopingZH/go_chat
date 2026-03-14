@@ -14,6 +14,7 @@ import {
   type UserOnlineStatus,
 } from "../api/http"
 import { useAuthStore } from "./auth"
+import { shouldApplySearchResponse } from "../utils/chatSearch"
 import type {
   ChatMessage,
   ChatType,
@@ -145,6 +146,7 @@ export interface AppToast {
 }
 
 let toastIdCounter = 0
+let searchRequestCounter = 0
 
 export const useChatStore = defineStore("chat", {
   state: () => ({
@@ -452,25 +454,43 @@ export const useChatStore = defineStore("chat", {
       this.searchKeyword = ""
       this.searchResults = []
       this.searchCurrentIndex = 0
+      searchRequestCounter++
+      this.isSearchingAPI = false
     },
     async executeSearch() {
       if (!this.activeKey || !this.searchKeyword.trim()) {
         this.searchResults = []
         this.searchCurrentIndex = 0
+        searchRequestCounter++
+        this.isSearchingAPI = false
         return
       }
 
       const auth = useAuthStore()
       if (!auth.token) return
 
+      const requestKeyword = this.searchKeyword.trim()
+      const requestKey = this.activeKey
+      const requestId = ++searchRequestCounter
       this.isSearchingAPI = true
       try {
-        const { chatType, targetId } = parseKey(this.activeKey)
-        const keyword = encodeURIComponent(this.searchKeyword.trim())
+        const { chatType, targetId } = parseKey(requestKey)
+        const keyword = encodeURIComponent(requestKeyword)
         // Fetch up to 100 results for the search
         const data = await apiRequest<MessageListResponse>(`/api/messages?target_id=${targetId}&type=${chatType}&keyword=${keyword}&limit=100`, {
           headers: authHeaders(auth.token),
         })
+
+        if (!shouldApplySearchResponse({
+          requestId,
+          activeRequestId: searchRequestCounter,
+          requestKeyword,
+          currentKeyword: this.searchKeyword,
+          requestKey,
+          currentKey: this.activeKey,
+        })) {
+          return
+        }
 
         this.searchResults = Array.isArray(data?.items) ? data.items.map((item) => toChatMessage(item, chatType)) : []
         
@@ -479,10 +499,22 @@ export const useChatStore = defineStore("chat", {
         
         this.searchCurrentIndex = this.searchResults.length > 0 ? 0 : -1
       } catch (error) {
+        if (!shouldApplySearchResponse({
+          requestId,
+          activeRequestId: searchRequestCounter,
+          requestKeyword,
+          currentKeyword: this.searchKeyword,
+          requestKey,
+          currentKey: this.activeKey,
+        })) {
+          return
+        }
         console.error("Search failed:", error)
         this.searchResults = []
       } finally {
-        this.isSearchingAPI = false
+        if (requestId === searchRequestCounter) {
+          this.isSearchingAPI = false
+        }
       }
     },
     nextSearchResult() {

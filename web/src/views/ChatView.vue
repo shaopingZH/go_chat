@@ -409,6 +409,7 @@ import { useAuthStore } from "../stores/auth"
 import { useChatStore } from "../stores/chat"
 import { useFriendStore } from "../stores/friend"
 import { useTheme } from "../composables/useTheme"
+import { buildSearchTargetKey } from "../utils/chatSearch"
 import type { ChatMessage } from "../types/chat"
 
 // Emoji Picker
@@ -954,8 +955,10 @@ watch(
 )
 
 watch(
-  () => chat.searchCurrentIndex,
-  async (index) => {
+  () => buildSearchTargetKey(chat.searchResults, chat.searchCurrentIndex),
+  async (targetKey) => {
+    const index = chat.searchCurrentIndex
+    if (!targetKey) return
     if (chat.searchResults.length === 0 || index < 0) return
     const targetMessage = chat.searchResults[index]
     
