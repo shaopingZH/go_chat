@@ -13,6 +13,12 @@ interface PendingImageMatchInput {
   targetId: number
 }
 
+interface ImageVisualStateInput {
+  uploading: boolean
+  complete: boolean
+  naturalWidth: number
+}
+
 let pendingImageIdSeed = -1
 
 export function createPendingImageMessage(input: PendingImageInput): ChatMessage {
@@ -40,4 +46,20 @@ export function findPendingImageReplacementIndex(
     Number(message.target_id) === input.targetId &&
     Number(message.sender?.id) === input.senderId,
   )
+}
+
+export function resolveImageVisualState(input: ImageVisualStateInput): { loading: boolean; error: boolean } {
+  if (input.uploading) {
+    return { loading: true, error: false }
+  }
+
+  if (!input.complete) {
+    return { loading: true, error: false }
+  }
+
+  if (input.naturalWidth > 0) {
+    return { loading: false, error: false }
+  }
+
+  return { loading: false, error: true }
 }

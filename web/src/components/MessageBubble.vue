@@ -21,7 +21,7 @@
       
       <!-- Content -->
       <div v-if="isImageMessage" class="relative group">
-        <img v-if="!imageLoadError" :src="message.content" alt="image message" class="tg-image-message" :class="{ 'tg-image-message--loading': imageLoading || message.uploading }" @click="handlePreview" @error="onImageError" @load="onImageLoad">
+        <img v-if="!imageLoadError" ref="imageRef" :src="message.content" alt="image message" class="tg-image-message" :class="{ 'tg-image-message--loading': imageLoading || message.uploading }" @click="handlePreview" @error="onImageError" @load="onImageLoad">
         <div v-else class="tg-image-fallback">图片加载失败</div>
 
         <Transition name="fade">
@@ -48,9 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue"
+import { computed, nextTick, ref, watch } from "vue"
 import type { ChatMessage } from "../types/chat"
 import { useChatStore } from "../stores/chat"
+import { resolveImageVisualState } from "../utils/chatImageUpload"
 
 const chat = useChatStore()
 
@@ -66,15 +67,19 @@ const emit = defineEmits<{
 
 const imageLoadError = ref(false)
 const imageLoading = ref(true)
+const imageRef = ref<HTMLImageElement | null>(null)
 
 const isImageMessage = computed(() => Number(props.message.msg_type) === 2)
 
 watch(
-  () => [props.message.id, props.message.content],
-  () => {
+  () => [props.message.id, props.message.content, props.message.uploading],
+  async () => {
     imageLoadError.value = false
     imageLoading.value = true
+    await nextTick()
+    syncImageVisualState()
   },
+  { immediate: true },
 )
 
 function onImageError() {
@@ -83,8 +88,20 @@ function onImageError() {
 }
 
 function onImageLoad() {
+  imageLoadError.value = false
   imageLoading.value = false
   emit('imageLoaded')
+}
+
+function syncImageVisualState() {
+  const state = resolveImageVisualState({
+    uploading: Boolean(props.message.uploading),
+    complete: Boolean(imageRef.value?.complete),
+    naturalWidth: Number(imageRef.value?.naturalWidth || 0),
+  })
+
+  imageLoading.value = state.loading
+  imageLoadError.value = state.error
 }
 
 function handlePreview() {
