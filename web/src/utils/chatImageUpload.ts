@@ -19,6 +19,12 @@ interface ImageVisualStateInput {
   naturalWidth: number
 }
 
+interface ImageOverlayPresentationInput {
+  uploading: boolean
+  loading: boolean
+  uploadProgressLabel?: string
+}
+
 let pendingImageIdSeed = -1
 
 export function createPendingImageMessage(input: PendingImageInput): ChatMessage {
@@ -62,4 +68,27 @@ export function resolveImageVisualState(input: ImageVisualStateInput): { loading
   }
 
   return { loading: false, error: true }
+}
+
+export function resolveImageOverlayPresentation(input: ImageOverlayPresentationInput): {
+  visible: boolean
+  mode: 'uploading' | 'loading'
+  label: string
+  reserveSpace: boolean
+} {
+  if (input.uploading) {
+    return {
+      visible: true,
+      mode: 'uploading',
+      label: input.uploadProgressLabel || '图片上传中...',
+      reserveSpace: false,
+    }
+  }
+
+  return {
+    visible: input.loading,
+    mode: 'loading',
+    label: '',
+    reserveSpace: input.loading,
+  }
 }

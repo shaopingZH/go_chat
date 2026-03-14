@@ -5,6 +5,7 @@ import type { ChatMessage } from '../src/types/chat.ts'
 import {
   createPendingImageMessage,
   findPendingImageReplacementIndex,
+  resolveImageOverlayPresentation,
   resolveImageVisualState,
 } from '../src/utils/chatImageUpload.ts'
 
@@ -78,4 +79,34 @@ test('resolveImageVisualState keeps overlay for uploading image even if preview 
   })
 
   assert.deepEqual(state, { loading: true, error: false })
+})
+
+test('resolveImageOverlayPresentation uses compact mode for remote image loading', () => {
+  const presentation = resolveImageOverlayPresentation({
+    uploading: false,
+    loading: true,
+    uploadProgressLabel: undefined,
+  })
+
+  assert.deepEqual(presentation, {
+    visible: true,
+    mode: 'loading',
+    label: '',
+    reserveSpace: true,
+  })
+})
+
+test('resolveImageOverlayPresentation uses labeled mode for uploading placeholder', () => {
+  const presentation = resolveImageOverlayPresentation({
+    uploading: true,
+    loading: true,
+    uploadProgressLabel: '图片上传中...',
+  })
+
+  assert.deepEqual(presentation, {
+    visible: true,
+    mode: 'uploading',
+    label: '图片上传中...',
+    reserveSpace: false,
+  })
 })

@@ -20,14 +20,14 @@
       </div>
       
       <!-- Content -->
-      <div v-if="isImageMessage" class="relative group">
+      <div v-if="isImageMessage" class="relative group" :class="{ 'tg-image-shell--pending': imageOverlayPresentation.reserveSpace }">
         <img v-if="!imageLoadError" ref="imageRef" :src="message.content" alt="image message" class="tg-image-message" :class="{ 'tg-image-message--loading': imageLoading || message.uploading }" @click="handlePreview" @error="onImageError" @load="onImageLoad">
         <div v-else class="tg-image-fallback">图片加载失败</div>
 
         <Transition name="fade">
           <div v-if="showImageOverlay" class="tg-image-upload-overlay">
             <div class="tg-image-upload-spinner"></div>
-            <span class="tg-image-upload-label">{{ imageOverlayLabel }}</span>
+            <span v-if="imageOverlayPresentation.label" class="tg-image-upload-label">{{ imageOverlayPresentation.label }}</span>
           </div>
         </Transition>
         
@@ -51,7 +51,7 @@
 import { computed, nextTick, ref, watch } from "vue"
 import type { ChatMessage } from "../types/chat"
 import { useChatStore } from "../stores/chat"
-import { resolveImageVisualState } from "../utils/chatImageUpload"
+import { resolveImageOverlayPresentation, resolveImageVisualState } from "../utils/chatImageUpload"
 
 const chat = useChatStore()
 
@@ -160,9 +160,13 @@ const timeText = computed(() => {
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`
 })
 
-const showImageOverlay = computed(() => !imageLoadError.value && (Boolean(props.message.uploading) || imageLoading.value))
+const imageOverlayPresentation = computed(() => resolveImageOverlayPresentation({
+  uploading: Boolean(props.message.uploading),
+  loading: imageLoading.value,
+  uploadProgressLabel: props.message.uploadProgressLabel,
+}))
 
-const imageOverlayLabel = computed(() => props.message.uploadProgressLabel || '图片加载中...')
+const showImageOverlay = computed(() => !imageLoadError.value && imageOverlayPresentation.value.visible)
 </script>
 
 <style scoped>
@@ -175,16 +179,26 @@ const imageOverlayLabel = computed(() => props.message.uploadProgressLabel || '�
   filter: saturate(0.9) brightness(0.82);
 }
 
+.tg-image-shell--pending {
+  min-width: min(220px, 58vw);
+  min-height: 160px;
+  border-radius: 15px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.11) 38%, rgba(255, 255, 255, 0.04) 55%);
+  background-size: auto, 220% 100%;
+  animation: tg-image-shell-shimmer 1.8s ease-in-out infinite;
+}
+
 .tg-image-upload-overlay {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.14), rgba(15, 23, 42, 0.48));
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.34));
   backdrop-filter: blur(2px);
 }
 
@@ -198,6 +212,7 @@ const imageOverlayLabel = computed(() => props.message.uploadProgressLabel || '�
 }
 
 .tg-image-upload-label {
+  margin-top: 10px;
   padding: 4px 10px;
   border-radius: 9999px;
   background: rgba(15, 23, 42, 0.52);
@@ -221,6 +236,15 @@ const imageOverlayLabel = computed(() => props.message.uploadProgressLabel || '�
 @keyframes tg-image-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes tg-image-shell-shimmer {
+  0% {
+    background-position: 0 0, 200% 0;
+  }
+  100% {
+    background-position: 0 0, -20% 0;
   }
 }
 </style>
